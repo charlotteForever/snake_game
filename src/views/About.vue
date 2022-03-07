@@ -111,8 +111,6 @@ export default {
         }
       });
 
-      console.log(this.penel.width);
-
       // 判断是否撞到墙，如果撞到墙，回到初始状态，并且弹出游戏失败
       if (
         head.x <= -10 ||
@@ -131,12 +129,10 @@ export default {
       // 如果食物的位置和蛇的身体重叠，那么重新生成一个食物
       this.food.x = this.randomTen(0, this.panel.width - 10);
       this.food.y = this.randomTen(0, this.panel.height - 10);
-      console.log("食物坐标", this.food.x, this.food.y);
       // 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined
       let overlapped = this.snake.find(
         (el) => el.x === this.food.x && el.y === this.food.y
       );
-      console.log("overlapped", overlapped);
       if (overlapped) {
         // 再生成一次食物
         this.addFood();
@@ -158,6 +154,7 @@ export default {
 
     // 改变蛇的方向
     changeDirection(e) {
+      console.log("changeDirection被触发了");
       // console.log("获取到了键盘事件", e.keyCode);
       // 如果按下了上且 speedY！=10（蛇不是往下走），那么就往上走（speedY=-10）
       // 判断用户按下了哪个键
@@ -193,11 +190,39 @@ export default {
         this.speedY = 10;
       }
     },
+
+    // 节流函数
+    throttle(func, delay) {
+      // 隔特定的事件响应
+      let throttle_timer;
+      return function () {
+        let throttle_context = this;
+        let throttle_arg = arguments;
+        setTimeout(() => {
+          throttle_timer = null;
+          func.apply(throttle_context, throttle_arg);
+        }, delay);
+      };
+    },
+
+    // 防抖函数
+    // debounce(func, delay) {
+    //   let debounce_timer;
+    //   return function () {
+    //     let debounce_context = this;
+    //     let arg = arguments;
+    //     clearTimeout(debounce_timer);
+    //     debounce_timer = setTimeout(() => {
+    //       func.apply(debounce_context, arg);
+    //       console.log("move Snake触发了");
+    //     }, delay);
+    //   };
+    // },
   },
 
   mounted() {
     // 监听键盘事件，获取用户当前按下的键。结合蛇的移动方向(speed),来对蛇进行移动
-    document.addEventListener("keyup", this.changeDirection);
+    // document.addEventListener("keyup", this.changeDirection);
     // 先创建面板
     /** @type {HTMLCanvasElement} */
     // panel在这里初始化
@@ -214,6 +239,11 @@ export default {
     // 生成一个食物;
     this.addFood();
     this.drawFood();
+    // 给整个document绑定事件
+    // 不防抖了，因为本来就需要很灵敏的反应
+    // document.onkeyup = this.debounce(this.changeDirection, 200);
+    // 简单节流一下
+    document.onkeyup = this.throttle(this.changeDirection, 200);
   },
 };
 </script>

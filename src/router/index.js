@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 // @ts-ignore
@@ -9,7 +10,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: () => import('../views/Home')
   },
   {
     path: '/about',
