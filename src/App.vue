@@ -1,8 +1,13 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home Page</router-link> |
-      <router-link to="/about">贪吃蛇</router-link>
+      <router-link to="/">
+        <el-link type="primary">Home Page</el-link></router-link
+      >
+      |
+      <router-link to="/about">
+        <el-link type="primary">贪吃蛇</el-link></router-link
+      >
     </div>
     <router-view />
   </div>
@@ -21,12 +26,12 @@
   padding: 30px;
 }
 
-#nav a {
+/* #nav a {
   font-weight: bold;
   color: #2c3e50;
 }
 
 #nav a.router-link-exact-active {
   color: #42b983;
-}
+} */
 </style>

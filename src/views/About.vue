@@ -1,10 +1,17 @@
 <template>
   <div class="game">
-    这是我的一个贪吃蛇小demo<br />
+    这是我的一个贪吃蛇小demo<br /><br />
     <canvas ref="panel" width="300" height="300"></canvas><br />
     <!-- <button @click="startGame">开始游戏</button> -->
     <el-row>
-      <el-button type="primary" plain @click="startGame">主要按钮</el-button>
+      <el-button v-show="!starting" type="primary" plain @click="startGame"
+        >点击开始游戏</el-button
+      >
+    </el-row>
+    <el-row>
+      <el-button v-show="starting" type="primary" plain @click="pauseGame"
+        >点击暂停游戏</el-button
+      >
     </el-row>
   </div>
 </template>
@@ -32,19 +39,27 @@ export default {
       },
       // 存放定时器
       timer: {},
+      // 游戏是否开始
+      starting: false,
     };
   },
   methods: {
     startGame() {
+      this.starting = true;
       // 每隔100ms重新绘制蛇
       this.timer = setInterval(() => {
         // 清空画布重新画蛇
         this.clearCanvas();
-        // 先画蛇
-        this.drawSnake();
         this.drawFood(); //画一个食物
         this.moveSnake(); //里面如果蛇吃掉了食物，就会重新生成一个食物；在下一次进入定时器时候画到屏幕上
+        this.drawSnake();
       }, 100);
+    },
+
+    // 暂停游戏
+    pauseGame() {
+      this.starting = false;
+      clearInterval(this.timer);
     },
 
     //清空画布
@@ -75,14 +90,14 @@ export default {
     moveSnake() {
       // 新建一个头部
       let snakePart = {
-        x: this.snake.x + this.speedX,
-        y: this.snake.y + this.speedY,
+        x: this.snake[0].x + this.speedX,
+        y: this.snake[0].y + this.speedY,
       };
       this.snake.unshift(snakePart);
       // 判断是否吃到食物
       if (this.snake[0].x === this.food.x && this.snake[0].y === this.food.y) {
         // 重新生成一个食物
-        addFood();
+        this.addFood();
       } else {
         // 删除尾巴
         this.snake.pop();
@@ -93,6 +108,8 @@ export default {
       // 如果食物的位置和蛇的身体重叠，那么重新生成一个食物
       this.food.x = this.randomTen(0, this.panel.width - 10);
       this.food.y = this.randomTen(0, this.panel.height - 10);
+      console.log("食物坐标", this.food.x, this.food.y);
+      // 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined
       let overlapped = this.snake.find(
         (el) => el.x === this.food.x && el.y === this.food.y
       );
@@ -115,9 +132,49 @@ export default {
     randomTen(min, max) {
       return Math.floor((Math.random() * (max - min + 1) + min) / 10) * 10;
     },
+
+    // 改变蛇的方向
+    changeDirection(e) {
+      // console.log("获取到了键盘事件", e.keyCode);
+      // 如果按下了上且 speedY！=10（蛇不是往下走），那么就往上走（speedY=-10）
+      // 判断用户按下了哪个键
+      let press_LEFT = 37;
+      let press_UP = 38;
+      let press_RIGHT = 39;
+      let press_DOWN = 40;
+      // 判断蛇目前的走向
+      let goingLeft = this.speedX === -10;
+      let goingUp = this.speedY === -10;
+      let goingRight = this.speedX === 10;
+      let goingDown = this.speedY === 10;
+      // 如果用户按下了 左，且蛇不是向右走
+      if (e.keyCode === press_LEFT && !goingRight) {
+        // 设置行走方向为左
+        this.speedX = -10;
+        this.speedY = 0;
+      }
+      // 如果用户按下了 上 且蛇不是向下走
+      else if (e.keyCode === press_UP && !goingDown) {
+        // 设置行走方向为上
+        this.speedX = 0;
+        this.speedY = -10;
+      }
+      // 入宫用户按下了 右 且蛇不是向左走
+      else if (e.keyCode === press_RIGHT && !goingLeft) {
+        this.speedX = 10;
+        this.speedY = 0;
+      }
+      // 如果用户按下了 下 且蛇不是向上走
+      else if (e.keyCode === press_DOWN && !goingUp) {
+        this.speedX = 0;
+        this.speedY = 10;
+      }
+    },
   },
 
   mounted() {
+    // 监听键盘事件，获取用户当前按下的键。结合蛇的移动方向(speed),来对蛇进行移动
+    document.addEventListener("keyup", this.changeDirection);
     // 先创建面板
     /** @type {HTMLCanvasElement} */
     // panel在这里初始化
@@ -131,10 +188,8 @@ export default {
     this.context.strokeRect(0, 0, this.panel.width, this.panel.height);
     // 画整条蛇
     // this.drawSnake();
-    console.log("mounted1", this.food.x, this.food.y);
-    // 生成一个食物
+    // 生成一个食物;
     this.addFood();
-    console.log("mounted2", this.food.x, this.food.y);
   },
 };
 </script>
