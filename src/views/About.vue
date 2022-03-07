@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     这是我的一个贪吃蛇小demo<br /><br />
-    <canvas ref="panel" width="300" height="300"></canvas><br />
+    <canvas ref="panel" width="500" height="500"></canvas><br />
     <!-- <button @click="startGame">开始游戏</button> -->
     <el-row>
       <el-button v-show="!starting" type="primary" plain @click="startGame"
@@ -89,11 +89,12 @@ export default {
     // 让蛇动起来
     moveSnake() {
       // 新建一个头部
-      let snakePart = {
+      let head = {
         x: this.snake[0].x + this.speedX,
         y: this.snake[0].y + this.speedY,
       };
-      this.snake.unshift(snakePart);
+      this.snake.unshift(head);
+
       // 判断是否吃到食物
       if (this.snake[0].x === this.food.x && this.snake[0].y === this.food.y) {
         // 重新生成一个食物
@@ -101,6 +102,28 @@ export default {
       } else {
         // 删除尾巴
         this.snake.pop();
+      }
+
+      // 判断是否撞到自己
+      this.snake.find((el, index) => {
+        if (el.x === head.x && el.y === head.y && index > 1) {
+          this.snake = this.snake.slice(0, index);
+        }
+      });
+
+      console.log(this.penel.width);
+
+      // 判断是否撞到墙，如果撞到墙，回到初始状态，并且弹出游戏失败
+      if (
+        head.x <= -10 ||
+        head.x >= this.panel.width ||
+        head.y <= -10 ||
+        head.y >= this.panel.height
+      ) {
+        alert("撞到墙了，游戏失败");
+        // 清除计时器
+        clearInterval(this.timer);
+        location.reload();
       }
     },
 
@@ -187,9 +210,10 @@ export default {
     // 绘制画布的边框
     this.context.strokeRect(0, 0, this.panel.width, this.panel.height);
     // 画整条蛇
-    // this.drawSnake();
+    this.drawSnake();
     // 生成一个食物;
     this.addFood();
+    this.drawFood();
   },
 };
 </script>
